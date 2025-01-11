@@ -8,8 +8,53 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(uuid())
-  name      String
-  email     String  @unique
-  createdAt DateTime  @default(now())
+  id          String @id @default(uuid())
+  username    String      @unique
+  password    String
+  firstName   String
+  lastName    String
+  timeZone    String      @default("IST(Bangalore / Bombay / New Delhi) (GMT+5:30)")
+  role        Role        @relation(fields: [roleId], references: [id])
+  roleId      Int
+  parentId    String?        // Tracks who created the user
+  parent      User?       @relation("UserParent", fields: [parentId], references: [id])
+  children    User[]      @relation("UserParent")
+  exposure    Float?      // Only for players
+  commission  Float?      // Only for players
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  sessions    Session[]
+  activityLogs ActivityLog[]
+}
+
+model Role {
+  id         Int  @id @default(autoincrement())
+  roleName   String @unique
+  shortName  String @unique
+  users User[]
+}
+
+model Session {
+  id         Int  @id @default(autoincrement())
+  userId     String
+  user       User @relation(fields: [userId], references: [id])
+  token      String @unique
+  createdAt  DateTime @default(now())
+}
+
+model ActivityLog {
+  id         Int  @id @default(autoincrement())
+  userId     String
+  user       User @relation(fields: [userId], references: [id])
+  dateTime   DateTime
+  date       String
+  time       String
+  status     String
+  ipAddress  String
+  isp        String
+  org        String
+  city       String
+  state      String
+  country    String
+  userAgent  String
 }
